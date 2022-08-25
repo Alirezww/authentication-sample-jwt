@@ -8,6 +8,8 @@ mongoose.connect("mongodb://localhost:27017/TokenTest", (err) => {
 
 const app = express();
 
+require('dotenv').config();
+
 app.use(express.urlencoded({ extended : false }));
 app.use(express.json())
 

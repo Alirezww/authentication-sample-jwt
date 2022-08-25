@@ -1,5 +1,5 @@
 const { UserModel } = require("../models/User");
-const { generateHashString } = require("../utils/functions");
+const { generateHashString, compareDataWithHash, tokenGenerator } = require("../utils/functions");
 
 class AuthController {
     
@@ -21,8 +21,30 @@ class AuthController {
         }
     }
 
-    login(){
+    async login(req, res, next){
+        try{
+            const { username, password } = req.body;
 
+            const user = await UserModel.findOne({ username });
+            if(!user) throw {status : 401, message : 'username or password is incorrect...'};
+
+            const isMatchPassword = compareDataWithHash(password, user.password);
+            if(!isMatchPassword) throw {status : 401, message : 'username or password is incorrect...'};
+
+            const token = tokenGenerator({ username }, "6 days");
+
+            user.token = token;
+            user.save()
+
+            return res.status(200).json({
+                status : 200,
+                success : true,
+                message : 'You have been logged in successfully!!',
+                token
+            })
+        }catch(err){
+            next(err)
+        }
     }
 }
 
